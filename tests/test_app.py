@@ -3,14 +3,14 @@ import json
 from app import create_app
 from app.utils import get_home_message, add_numbers ## import the helper function
 
-@pytest.fixture
-def app():
-    app = create_app('testing')
-    yield app
-
-@pytest.fixture
-def client(app):
-    return app.test_client()
+# @pytest.fixture
+# def app():
+#     app = create_app('testing')
+#     yield app
+#
+# @pytest.fixture
+# def client(app):
+#     return app.test_client()
 
 
 # TEST CASES
