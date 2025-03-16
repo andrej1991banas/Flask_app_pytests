@@ -3,12 +3,7 @@ from app import create_app
 from app.utils import get_home_message, add_numbers ## import the helper function
 
 
-
-"""Unit Tests
-   - Routes/Endpoints (status codes, response content)
-   - View Functions (logic in isolation)
-   - Helper Functions (utility/business logic)"""
-
+"""Test the home page for status code and message in json"""
 def test_home_route(client):
     """Test the home page for status code and message in json"""
     response = client.get('/')
@@ -21,13 +16,16 @@ def test_home_route(client):
     assert data["message"] == "Welcome to the Flask App"
 
 
+""" test home message with helper function result"""
 def test_get_home_message(client):
+    """ test home message with helper function result"""
     message = get_home_message() # use of helper func
     assert message == {"message": "Welcome to the Flask App"}
 
 
+""" test add route for different datas """
 def test_add(client):
-
+    """ test add route for different datas """
     response = client.get('/add/4/6')
     assert response.status_code == 200  #check status code
     assert response.content_type == 'application/json'#check for JSON data
@@ -42,6 +40,7 @@ def test_add(client):
     assert response.status_code == 404
 
 
+"""Test the about page for status code and message"""
 def test_about_route(client):
     """Test the about page for status code and message"""
     response = client.get('/about')
@@ -49,6 +48,7 @@ def test_about_route(client):
     assert b"About Page" in response.data #assert the presence of the string
 
 
+"""Test that the 'else' block sets TESTING to False."""
 def test_configuration_else(client):
     """Test that the 'else' block sets TESTING to False."""
     config_name = ('Produciton') #Any value other than 'testing'
@@ -56,7 +56,9 @@ def test_configuration_else(client):
     assert app.config['TESTING'] is False # Verify that TESTING is set to False
 
 
+""" test result for helper function add_numbers()"""
 def test_add_numbers(client):
+    """ test result for helper function add_numbers()"""
     result = add_numbers(5, 7)
     assert result == 12
 
@@ -70,12 +72,7 @@ def test_add_numbers(client):
     assert result == -7
 
 
-
-"""Integration Tests
-   - Database Interactions (CRUD operations)
-   - Form Handling (submissions, validation)
-   - API Endpoints (JSON responses, error handling)"""
-
+"""Test submitting the form with valid data redirects to success."""
 def test_create_item(client):
     """Test submitting the form with valid data redirects to success."""
     form_data = {
@@ -99,9 +96,11 @@ def test_create_item(client):
     assert b"hello" in response.data
 
 
+""" test adding items to database with helpder init_database() function and check 
+saving them into database"""
 def test_adding_to_database(client, init_database):
+    """ test adding items to database with helpder init_database() function and check"""
     response = client.get('/items')
-
     data = response.get_json() # Get the JSON response from the test client (query of all items from db)
     assert response.status_code == 200
     assert len(data) == 2 #check if 2 items were added to db from init_database func
@@ -109,6 +108,7 @@ def test_adding_to_database(client, init_database):
     assert data[1] == {"id": 2, "name": "Jane", "description": "bla2"} #returning second item from database
 
 
+"""Test the success page with a valid user ID."""
 def test_getting_item_by_id (client, init_database, app):
     """Test the success page with a valid user ID."""
     response = client.get('/items/1') #returning data for id.item from database
@@ -122,6 +122,7 @@ def test_getting_item_by_id (client, init_database, app):
     assert data["error"] == "Item not found" #error message from 404 page
 
 
+"""Test updating an item's details by ID."""
 def test_putting_new_details_with_item_id(client, init_database, app):
     """Test updating an item's details by ID."""
     # Send a PUT request with updated data
@@ -165,6 +166,7 @@ def test_putting_new_details_with_item_id(client, init_database, app):
     assert data["error"] == "Invalid type for 'description'. Expected a string."
 
 
+"""test deleting the item with item id"""
 def test_delete_item_with_item_id(client, init_database, app):
     """test deleting the item with item id"""
     response = client.delete('/items/1')
@@ -185,8 +187,7 @@ def test_delete_item_with_item_id(client, init_database, app):
     assert data["error"] == "Item not found"
 
 
-"""Form Handling (Submissions, Validation)"""
-
+"""test rendering HTML page with everything on it"""
 def test_submit_works(client):
     """verifying rendering HTML page with everything on it"""
     # Test GET request to render the form
@@ -224,6 +225,7 @@ def test_submit_works(client):
     assert '<label for="description">' in data  # Check label for description field
 
 
+""" test for invalid data and not validating the form """
 def test_items_for_no_form_data_with_post(client):
     """ test for invalid data and not validating the form """
     form_data = {"name": "",
@@ -242,6 +244,8 @@ def test_items_for_no_form_data_with_post(client):
     assert data["error"] == "No form data provided"
 
 
+
+""" test for non integer input for add route"""
 def test_non_integer_data_input_for_add_number(client):
     """ test for non integer input for add route"""
     response = client.get('/add/12.5/7')
@@ -251,6 +255,7 @@ def test_non_integer_data_input_for_add_number(client):
     assert response.content_type == 'application/json'  # check for JSON data
 
 
+""" test for non json data with PUT request and error message"""
 def test_item_for_put_not_json_data(client):
     """ test for non json data with PUT request and error message"""
     invalid_data = "John bla" # Plain text, not a JSON object
@@ -260,6 +265,7 @@ def test_item_for_put_not_json_data(client):
     assert data["error"] == "Request must contain JSON data"
 
 
+""" test creating new item with valid data """
 def test_create_item_for_valid_data(client):
     """ test creating new item with valid data """
     #not using ini_database as parameter I will assert id=1
@@ -270,6 +276,7 @@ def test_create_item_for_valid_data(client):
     assert response.content_type == 'application/json'
 
 
+"""Test updating only one field of the item."""
 def test_item_put_update_only_one_field(client, init_database):
     """Test updating only one field of the item."""
     update_data = {"name": "Andrej", "description": ""} # Update only the "name" field even the description is empty string
@@ -281,6 +288,7 @@ def test_item_put_update_only_one_field(client, init_database):
     assert data == {'id': 1, 'name': 'Andrej', 'description': 'bla'}
 
 
+""" testing the content type for different routes and requests"""
 def test_content_type_across_routes(client, init_database, app):
     response = client.post('/items', data={'name': 'Andrej', 'description': 'lorem'})
     assert response.status_code == 201
@@ -300,3 +308,51 @@ def test_content_type_across_routes(client, init_database, app):
 
     response = client.get('/add/1/2')
     assert response.content_type == 'application/json'
+
+
+""" test 404 error page """
+def test_404_error_page(client):
+    response = client.get('/nonexistent') #not existing route
+    assert response.status_code == 404
+
+
+""" test intentional error page"""
+def test_intentional_error_page(client):
+    """Test the intentional error page by triggering a ZeroDivisionError"""
+    response = client.get('/trigger-error')
+    data = response.get_json()
+
+    # Assert the status code and the error message
+    assert response.status_code == 500
+    assert data["error"] == "An internal server error occurred - ZeroDivisionError"
+
+
+""" test config mode for debug=TRUE"""
+def test_config_mode_debug_true(client):
+    response = client.get('/config-status')
+    data=  response.get_json()
+    assert response.status_code == 200
+    assert data["debug_mode"] == True
+
+
+""" test production and testing config"""
+def test_config_mode_production_testing(client2, client): #set up of the app for production
+    """ test production set up of the app """
+    response = client2.get('/config-status')
+    data=  response.get_json()
+    assert response.status_code == 200
+    assert data["debug_mode"] == False
+
+    response = client.get('/config-status')
+    data=  response.get_json()
+    assert response.status_code == 200
+    assert data["debug_mode"] == True
+
+
+
+
+
+
+
+
+

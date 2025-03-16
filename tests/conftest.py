@@ -12,9 +12,26 @@ def app():
         db.drop_all()
 
 @pytest.fixture
+def app2():
+    """initialize the production instance of the app"""
+    app2 = create_app('production')
+    with app2.app_context():
+        db.create_all()
+        yield app2
+        db.drop_all()
+
+
+@pytest.fixture
 def client(app):
     """initialize the client"""
     return app.test_client()
+
+
+@pytest.fixture
+def client2(app2):
+    """initialize the client for production"""
+    return app2.test_client()
+
 
 @pytest.fixture
 def init_database(app):
@@ -27,3 +44,5 @@ def init_database(app):
         db.session.commit()
         yield
         db.session.rollback()
+
+
