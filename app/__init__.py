@@ -10,6 +10,7 @@ def create_app(config_name='development'):
     # Configuration
     if config_name == 'testing':
         app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for testing
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # In-memory DB for tests
     else:
         app.config['TESTING'] = False
