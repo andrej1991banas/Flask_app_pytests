@@ -53,19 +53,27 @@ def init_routes(app):
         item = Item.query.get(id)
         if not item:
             return jsonify({"error": "Item not found"}), 404
-        if not request.is_json:
+
+        if not request.is_json:  # Add this for robustness
             return jsonify({"error": "Request must contain JSON data"}), 400
+
         data = request.get_json()
+        if data is None:  # Handle case where JSON parsing fails
+            return jsonify({"error": "Invalid JSON data"}), 400
+
         name = data.get('name')
         description = data.get('description')
+
         if name is not None and not isinstance(name, str):
             return jsonify({"error": "Invalid type for 'name'. Expected a string."}), 400
         if description is not None and not isinstance(description, str):
             return jsonify({"error": "Invalid type for 'description'. Expected a string."}), 400
-        item.name = name if name is not None else item.name
-        item.description = description if description is not None else item.description
+
+        item.name = name if name is not None and len(name)>0 else item.name
+        item.description = description if description is not None and len(description)>0 else item.description
         db.session.commit()
         return jsonify({"id": item.id, "name": item.name, "description": item.description}), 200
+
 
     @app.route('/items/<int:id>', methods=['DELETE'])
     def delete_item(id):
@@ -80,26 +88,32 @@ def init_routes(app):
     def submit_form():
         form = ItemForm()
         if request.method == 'POST':
-            if not request.form:
-                return jsonify({"error": "No form data provided"}), 400
             if form.validate_on_submit():
+                # Return JSON on successful submission
                 return jsonify({
                     "message": "Form submitted",
                     "name": form.name.data,
                     "description": form.description.data
                 }), 200
             else:
-                errors = form.errors
-                if "name" in errors:
-                    if any("required" in msg.lower() for msg in errors["name"]):
-                        return jsonify({"error": "Name required"}), 400
-                    if any("longer than" in msg.lower() for msg in errors["name"]):
-                        return jsonify({"error": "Name is too long"}), 400
-                if "description" in errors:
-                    if any("longer than" in msg.lower() for msg in errors["description"]):
-                        return jsonify({"error": "Description is too long"}), 400
-                return jsonify({"error": "Invalid form data", "errors": errors}), 400
-        return render_template('submit.html', form=form), 200
+                if len(form.name.data) > 25:
+                    # Return JSON with error details when form is invalid
+                    return jsonify({
+                        "error": "Name is too long"
+                    }), 400
+                if len(form.description.data) > 200:
+                    # Return JSON with error details when form is invalid
+                    return jsonify({
+                        "error": "Description is too long"
+                    }), 400
+                if form.name.data == "":
+                    # Return JSON with error details when form is invalid
+                    return jsonify({
+                        "error": "Name required"
+                    }), 400
+
+        # For GET requests, render the form HTML page
+        return render_template('submit.html', form=form)
 
     # New Route for Config Testing
     @app.route('/config-status')

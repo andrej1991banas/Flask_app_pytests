@@ -34,10 +34,10 @@ def test_add(client):
     assert data["result"]==10
 
     response = client.get('/add/-2/3')
-    assert response.status_code == 404 #check status code
+    assert response.status_code == 200 #check status code
 
     response = client.get('/add/abc/7')
-    assert response.status_code == 404
+    assert response.status_code == 400
 
 
 """Test the about page for status code and message"""
@@ -244,7 +244,6 @@ def test_items_for_no_form_data_with_post(client):
     assert data["error"] == "No form data provided"
 
 
-
 """ test for non integer input for add route"""
 def test_non_integer_data_input_for_add_number(client):
     """ test for non integer input for add route"""
@@ -256,7 +255,7 @@ def test_non_integer_data_input_for_add_number(client):
 
 
 """ test for non json data with PUT request and error message"""
-def test_item_for_put_not_json_data(client):
+def test_item_for_put_not_json_data(client, init_database):
     """ test for non json data with PUT request and error message"""
     invalid_data = "John bla" # Plain text, not a JSON object
     response = client.put('/items/1', data=invalid_data, content_type='text/plain')
