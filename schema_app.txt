@@ -1,0 +1,12 @@
+Flask_app_tests/
+├── app/
+│   ├── __init__.py    # Sets up Flask and the database
+│   ├── forms.py       # Makes the form for submitting items
+│   ├── models.py      # Defines what an “Item” looks like (name, description)
+│   ├── routes.py      # All the pages and actions (like /items, /submit)
+│   ├── templates/     # HTML file (submit.html) for the form
+│   └── utils.py       # Little helpers (like adding numbers)
+├── tests/
+│   └── test_app.py    # All the tests
+├── app.py             # Starts the app
+└── requirements.txt   # List of tools the app needs
